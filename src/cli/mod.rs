@@ -4,7 +4,7 @@ use clap::Parser;
 #[command(
     name = "forge",
     author = "Nick Hudson <nick.hudson@gmail.com>",
-    version = "0.1.0",
+    version = "0.1.1",
     about = "Convert PFX/P12 certificate files to PEM format",
     long_about = "A Rust-based tool for converting PFX (PKCS#12) certificate files to PEM format. \
                   Supports password-protected files, certificate chains, and various output options."

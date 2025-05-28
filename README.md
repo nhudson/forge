@@ -25,7 +25,7 @@ Download the latest release for your platform from the [releases page](https://g
 > **Note for Windows users**: Pre-built Windows binaries include OpenSSL statically linked, so no additional OpenSSL installation is required.
 
 ```bash
-# Linux (x86_64) - replace {version} with the latest version (e.g., 0.1.0)
+# Linux (x86_64) - replace {version} with the latest version (e.g., 0.1.1)
 curl -L https://github.com/nhudson/forge/releases/latest/download/forge-linux-x86_64-{version}.tar.gz | tar xz
 sudo mv forge /usr/local/bin/
 
