@@ -3,11 +3,11 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to release'
+        description: "Tag to release"
         required: true
         type: string
 
@@ -37,217 +37,217 @@ jobs:
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-24.04-arm
             name: forge-linux-aarch64
-          
+
           # macOS aarch64
           - target: aarch64-apple-darwin
             os: macos-latest
             name: forge-macos-aarch64
-          
+
           # Windows x86_64
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             name: forge-windows-x86_64
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Extract version from tag
-      id: version
-      shell: bash
-      run: |
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          VERSION="${{ github.event.inputs.tag }}"
-        else
-          VERSION="${GITHUB_REF#refs/tags/}"
-        fi
-        echo "version=${VERSION}" >> $GITHUB_OUTPUT
-        echo "version_clean=${VERSION#v}" >> $GITHUB_OUTPUT
+      - name: Extract version from tag
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.tag }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "version_clean=${VERSION#v}" >> $GITHUB_OUTPUT
 
-    - name: Install Rust toolchain
-      uses: actions-rust-lang/setup-rust-toolchain@v1
-      with:
-        toolchain: stable
-        target: ${{ matrix.target }}
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
 
-    - name: Install OpenSSL (Linux)
-      if: matrix.os == 'ubuntu-latest' || matrix.os == 'ubuntu-24.04-arm'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y pkg-config libssl-dev
+      - name: Install OpenSSL (Linux)
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'ubuntu-24.04-arm'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libssl-dev
 
-    - name: Install OpenSSL (macOS)
-      if: matrix.os == 'macos-latest'
-      run: |
-        brew install openssl pkg-config
-        echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl)" >> $GITHUB_ENV
+      - name: Install OpenSSL (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install openssl pkg-config
+          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl)" >> $GITHUB_ENV
 
-    - name: Install OpenSSL (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        vcpkg install openssl:x64-windows-static
-        echo "OPENSSL_DIR=C:\vcpkg\installed\x64-windows-static" >> $env:GITHUB_ENV
-        echo "OPENSSL_LIB_DIR=C:\vcpkg\installed\x64-windows-static\lib" >> $env:GITHUB_ENV
-        echo "OPENSSL_INCLUDE_DIR=C:\vcpkg\installed\x64-windows-static\include" >> $env:GITHUB_ENV
-        echo "OPENSSL_STATIC=1" >> $env:GITHUB_ENV
-        echo "VCPKGRS_DYNAMIC=0" >> $env:GITHUB_ENV
+      - name: Install OpenSSL (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          vcpkg install openssl:x64-windows-static
+          echo "OPENSSL_DIR=C:\vcpkg\installed\x64-windows-static" >> $env:GITHUB_ENV
+          echo "OPENSSL_LIB_DIR=C:\vcpkg\installed\x64-windows-static\lib" >> $env:GITHUB_ENV
+          echo "OPENSSL_INCLUDE_DIR=C:\vcpkg\installed\x64-windows-static\include" >> $env:GITHUB_ENV
+          echo "OPENSSL_STATIC=1" >> $env:GITHUB_ENV
+          echo "VCPKGRS_DYNAMIC=0" >> $env:GITHUB_ENV
 
-    - name: Set artifact names
-      shell: bash
-      run: |
-        VERSION="${{ steps.version.outputs.version_clean }}"
-        if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          ARTIFACT_NAME="${{ matrix.name }}-${VERSION}.zip"
-        else
-          ARTIFACT_NAME="${{ matrix.name }}-${VERSION}.tar.gz"
-        fi
-        echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
+      - name: Set artifact names
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version_clean }}"
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            ARTIFACT_NAME="${{ matrix.name }}-${VERSION}.zip"
+          else
+            ARTIFACT_NAME="${{ matrix.name }}-${VERSION}.tar.gz"
+          fi
+          echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
 
-    - name: Build binary
-      run: cargo build --release --target ${{ matrix.target }}
+      - name: Build binary
+        run: cargo build --release --target ${{ matrix.target }}
 
-    - name: Strip binary (Unix)
-      if: matrix.os != 'windows-latest'
-      run: |
-        if [ "${{ matrix.target }}" != "aarch64-unknown-linux-gnu" ]; then
-          strip target/${{ matrix.target }}/release/forge
-        fi
+      - name: Strip binary (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          if [ "${{ matrix.target }}" != "aarch64-unknown-linux-gnu" ]; then
+            strip target/${{ matrix.target }}/release/forge
+          fi
 
-    - name: Create archive (Unix)
-      if: matrix.os != 'windows-latest'
-      run: |
-        cd target/${{ matrix.target }}/release
-        tar czf ../../../${{ env.ARTIFACT_NAME }} forge
-        cd -
+      - name: Create archive (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cd target/${{ matrix.target }}/release
+          tar czf ../../../${{ env.ARTIFACT_NAME }} forge
+          cd -
 
-    - name: Create archive (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        cd target/${{ matrix.target }}/release
-        7z a ../../../${{ env.ARTIFACT_NAME }} forge.exe
-        cd -
+      - name: Create archive (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd target/${{ matrix.target }}/release
+          7z a ../../../${{ env.ARTIFACT_NAME }} forge.exe
+          cd -
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ env.ARTIFACT_NAME }}
-        path: ${{ env.ARTIFACT_NAME }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_NAME }}
 
   publish-crate:
     name: Publish to Crates.io
     needs: [build-binaries]
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install Rust toolchain
-      uses: actions-rust-lang/setup-rust-toolchain@v1
-      with:
-        toolchain: stable
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
 
-    - name: Install OpenSSL
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y pkg-config libssl-dev
+      - name: Install OpenSSL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libssl-dev
 
-    - name: Publish to crates.io
-      run: cargo publish --locked
-      env:
-        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      - name: Publish to crates.io
+        run: cargo publish --locked
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
   build-docker:
     name: Build Docker Image
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Log in to GitHub Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ghcr.io/${{ github.repository }}
-        tags: |
-          type=ref,event=tag
-          type=raw,value=latest,enable={{is_default_branch}}
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=tag
+            type=raw,value=latest,enable={{is_default_branch}}
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        platforms: linux/amd64,linux/arm64
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   create-release:
     name: Create Release
-    needs: [build-binaries, publish-crate, build-docker]
+    needs: [build-binaries, build-docker]
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Extract version from tag
-      id: version
-      shell: bash
-      run: |
-        VERSION="${GITHUB_REF#refs/tags/}"
-        echo "version=${VERSION}" >> $GITHUB_OUTPUT
-        echo "version_clean=${VERSION#v}" >> $GITHUB_OUTPUT
+      - name: Extract version from tag
+        id: version
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "version_clean=${VERSION#v}" >> $GITHUB_OUTPUT
 
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: artifacts
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
 
-    - name: Move artifacts to root
-      shell: bash
-      run: |
-        # Find all .tar.gz and .zip files recursively and move them to root
-        find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec mv {} . \;
-        echo "=== Files in root ==="
-        ls -la *.tar.gz *.zip 2>/dev/null || echo "No artifacts found in root"
+      - name: Move artifacts to root
+        shell: bash
+        run: |
+          # Find all .tar.gz and .zip files recursively and move them to root
+          find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec mv {} . \;
+          echo "=== Files in root ==="
+          ls -la *.tar.gz *.zip 2>/dev/null || echo "No artifacts found in root"
 
-    - name: Generate changelog
-      id: changelog
-      shell: bash
-      run: |
-        if [ -f CHANGELOG.md ]; then
-          # Extract changelog for this version
-          awk '/^## \[/{if(p) exit; if(/\['"${GITHUB_REF#refs/tags/}"'\]/) p=1; next} p' CHANGELOG.md > release_notes.md
-        else
-          echo "Release ${GITHUB_REF#refs/tags/}" > release_notes.md
-          echo "" >> release_notes.md
-          echo "## Changes" >> release_notes.md
-          echo "" >> release_notes.md
-          git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> release_notes.md
-        fi
+      - name: Generate changelog
+        id: changelog
+        shell: bash
+        run: |
+          if [ -f CHANGELOG.md ]; then
+            # Extract changelog for this version
+            awk '/^## \[/{if(p) exit; if(/\['"${GITHUB_REF#refs/tags/}"'\]/) p=1; next} p' CHANGELOG.md > release_notes.md
+          else
+            echo "Release ${GITHUB_REF#refs/tags/}" > release_notes.md
+            echo "" >> release_notes.md
+            echo "## Changes" >> release_notes.md
+            echo "" >> release_notes.md
+            git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> release_notes.md
+          fi
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        body_path: release_notes.md
-        files: |
-          forge-linux-x86_64-${{ steps.version.outputs.version_clean }}.tar.gz
-          forge-linux-aarch64-${{ steps.version.outputs.version_clean }}.tar.gz
-          forge-macos-x86_64-${{ steps.version.outputs.version_clean }}.tar.gz
-          forge-macos-aarch64-${{ steps.version.outputs.version_clean }}.tar.gz
-          forge-windows-x86_64-${{ steps.version.outputs.version_clean }}.zip
-        draft: false
-        prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: release_notes.md
+          files: |
+            forge-linux-x86_64-${{ steps.version.outputs.version_clean }}.tar.gz
+            forge-linux-aarch64-${{ steps.version.outputs.version_clean }}.tar.gz
+            forge-macos-x86_64-${{ steps.version.outputs.version_clean }}.tar.gz
+            forge-macos-aarch64-${{ steps.version.outputs.version_clean }}.tar.gz
+            forge-windows-x86_64-${{ steps.version.outputs.version_clean }}.zip
+          draft: false
+          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
