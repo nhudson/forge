@@ -51,6 +51,7 @@ jobs:
 
     - name: Extract version from tag
       id: version
+      shell: bash
       run: |
         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
           VERSION="${{ github.event.inputs.tag }}"
@@ -94,6 +95,7 @@ jobs:
         echo "VCPKGRS_DYNAMIC=0" >> $env:GITHUB_ENV
 
     - name: Set artifact names
+      shell: bash
       run: |
         VERSION="${{ steps.version.outputs.version_clean }}"
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
