@@ -1,0 +1,38 @@
+[package]
+name = "forge"
+description = "Forge is a cli tool for converting PFX/P12 certificate files to PEM format"
+authors = ["Nick Hudson <nick.hudson@gmail.com>"]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/nhudson/forge"
+repository = "https://github.com/nhudson/forge"
+keywords = ["pfx", "p12", "pem", "certificate", "ssl", "tls", "crypto"]
+categories = ["command-line-utilities", "cryptography"]
+
+[[bin]]
+name = "forge"
+path = "src/main.rs"
+
+[lib]
+name = "forge"
+path = "src/lib.rs"
+
+[dependencies]
+clap = { version = "4.5.39", features = ["derive"] }
+openssl = "0.10.72"
+console = "0.15.11"
+indicatif = "0.17.11"
+tabled = "0.19.0"
+colored = "3.0.0"
+
+[dev-dependencies]
+tempfile = "3.20.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
