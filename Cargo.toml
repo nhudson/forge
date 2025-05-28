@@ -8,7 +8,7 @@ license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/nhudson/forge"
 repository = "https://github.com/nhudson/forge"
-keywords = ["pfx", "p12", "pem", "certificate", "ssl", "tls", "crypto"]
+keywords = ["pfx", "p12", "pem", "certificate", "ssl"]
 categories = ["command-line-utilities", "cryptography"]
 
 [[bin]]
