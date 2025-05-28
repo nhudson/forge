@@ -203,6 +203,7 @@ jobs:
 
     - name: Extract version from tag
       id: version
+      shell: bash
       run: |
         VERSION="${GITHUB_REF#refs/tags/}"
         echo "version=${VERSION}" >> $GITHUB_OUTPUT
@@ -214,13 +215,16 @@ jobs:
         path: artifacts
 
     - name: Move artifacts to root
+      shell: bash
       run: |
-        find artifacts -name "*.tar.gz" -o -name "*.zip" | while read file; do
-          mv "$file" .
-        done
+        # Find all .tar.gz and .zip files recursively and move them to root
+        find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec mv {} . \;
+        echo "=== Files in root ==="
+        ls -la *.tar.gz *.zip 2>/dev/null || echo "No artifacts found in root"
 
     - name: Generate changelog
       id: changelog
+      shell: bash
       run: |
         if [ -f CHANGELOG.md ]; then
           # Extract changelog for this version
