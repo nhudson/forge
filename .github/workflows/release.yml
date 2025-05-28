@@ -258,6 +258,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          name: Release ${{ steps.version.outputs.version }}
+          tag_name: ${{ steps.version.outputs.version }}
           body_path: release_notes.md
           files: |
             forge-linux-x86_64-${{ steps.version.outputs.version_clean }}.tar.gz
