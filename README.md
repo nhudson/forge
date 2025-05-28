@@ -74,7 +74,7 @@ If you have Rust installed, you can install forge directly from crates.io or fro
 
 ```bash
 # Install from crates.io
-cargo install forge
+cargo install forge-pfx
 
 # Install from Git repository (latest development version)
 cargo install --git https://github.com/nhudson/forge
@@ -275,8 +275,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - 🐛 [Report bugs](https://github.com/nhudson/forge/issues)
 - 💡 [Request features](https://github.com/nhudson/forge/issues)
-- 📖 [Documentation](https://github.com/nhudson/forge/wiki)
+<!-- - 📖 [Documentation](https://github.com/nhudson/forge/wiki) -->
 
 ---
-
-Made with ❤️ by [Nick Hudson](https://github.com/nhudson) 

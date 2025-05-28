@@ -24,20 +24,22 @@ jobs:
     strategy:
       matrix:
         include:
-          # Linux
+          # Linux x86_64
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             name: forge-linux-x86_64
+
+          # Linux aarch64
           - target: aarch64-unknown-linux-gnu
-            os: ubuntu-latest
+            os: ubuntu-24.04-arm
             name: forge-linux-aarch64
           
-          # macOS
+          # macOS aarch64
           - target: aarch64-apple-darwin
             os: macos-latest
             name: forge-macos-aarch64
           
-          # Windows
+          # Windows x86_64
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             name: forge-windows-x86_64
@@ -64,16 +66,11 @@ jobs:
         toolchain: stable
         target: ${{ matrix.target }}
 
-    - name: Install cross-compilation tools (Linux)
-      if: matrix.os == 'ubuntu-latest'
+    - name: Install OpenSSL (Linux)
+      if: matrix.os == 'ubuntu-latest' || matrix.os == 'ubuntu-24.04-arm'
       run: |
         sudo apt-get update
         sudo apt-get install -y pkg-config libssl-dev
-        if [ "${{ matrix.target }}" = "aarch64-unknown-linux-gnu" ]; then
-          sudo apt-get install -y gcc-aarch64-linux-gnu
-          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
-          echo "PKG_CONFIG_ALLOW_CROSS=1" >> $GITHUB_ENV
-        fi
 
     - name: Install OpenSSL (macOS)
       if: matrix.os == 'macos-latest'

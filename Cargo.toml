@@ -1,5 +1,5 @@
 [package]
-name = "forge"
+name = "forge-pfx"
 description = "Forge is a cli tool for converting PFX/P12 certificate files to PEM format"
 authors = ["Nick Hudson <nick.hudson@gmail.com>"]
 version = "0.1.0"
