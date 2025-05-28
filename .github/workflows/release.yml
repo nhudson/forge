@@ -205,7 +205,11 @@ jobs:
         id: version
         shell: bash
         run: |
-          VERSION="${GITHUB_REF#refs/tags/}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.tag }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "version_clean=${VERSION#v}" >> $GITHUB_OUTPUT
 
@@ -226,15 +230,29 @@ jobs:
         id: changelog
         shell: bash
         run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.tag }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          
           if [ -f CHANGELOG.md ]; then
             # Extract changelog for this version
-            awk '/^## \[/{if(p) exit; if(/\['"${GITHUB_REF#refs/tags/}"'\]/) p=1; next} p' CHANGELOG.md > release_notes.md
+            awk '/^## \[/{if(p) exit; if(/\['"${VERSION}"'\]/) p=1; next} p' CHANGELOG.md > release_notes.md
           else
-            echo "Release ${GITHUB_REF#refs/tags/}" > release_notes.md
+            echo "Release ${VERSION}" > release_notes.md
             echo "" >> release_notes.md
             echo "## Changes" >> release_notes.md
             echo "" >> release_notes.md
-            git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> release_notes.md
+            
+            # Get previous tag, if any exists
+            PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+            if [ -n "$PREV_TAG" ]; then
+              git log --pretty=format:"- %s" ${PREV_TAG}..HEAD >> release_notes.md
+            else
+              # If no previous tag, get all commits
+              git log --pretty=format:"- %s" >> release_notes.md
+            fi
           fi
 
       - name: Create Release
@@ -244,7 +262,6 @@ jobs:
           files: |
             forge-linux-x86_64-${{ steps.version.outputs.version_clean }}.tar.gz
             forge-linux-aarch64-${{ steps.version.outputs.version_clean }}.tar.gz
-            forge-macos-x86_64-${{ steps.version.outputs.version_clean }}.tar.gz
             forge-macos-aarch64-${{ steps.version.outputs.version_clean }}.tar.gz
             forge-windows-x86_64-${{ steps.version.outputs.version_clean }}.zip
           draft: false
