@@ -1,0 +1,179 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:base",
+        ":dependencyDashboard",
+        ":semanticCommits",
+        ":automergeDigest",
+        ":automergeBranch"
+    ],
+    "timezone": "America/New_York",
+    "schedule": [
+        "before 10am on monday"
+    ],
+    "labels": [
+        "dependencies"
+    ],
+    "assignees": [
+        "nhudson"
+    ],
+    "reviewers": [
+        "nhudson"
+    ],
+    "prConcurrentLimit": 10,
+    "prHourlyLimit": 2,
+    "commitMessagePrefix": "deps:",
+    "commitMessageAction": "update",
+    "commitMessageTopic": "{{depName}}",
+    "commitMessageExtra": "to {{newVersion}}",
+    "semanticCommits": "enabled",
+    "separateMinorPatch": true,
+    "separateMajorMinor": true,
+    "separateMultipleMajor": true,
+    "rangeStrategy": "bump",
+    "packageRules": [
+        {
+            "description": "Rust dependencies",
+            "matchManagers": [
+                "cargo"
+            ],
+            "commitMessagePrefix": "deps(rust):",
+            "labels": [
+                "dependencies",
+                "rust"
+            ],
+            "schedule": [
+                "before 10am on monday"
+            ],
+            "prPriority": 5,
+            "automerge": false,
+            "groupName": "Rust dependencies"
+        },
+        {
+            "description": "GitHub Actions",
+            "matchManagers": [
+                "github-actions"
+            ],
+            "commitMessagePrefix": "ci:",
+            "labels": [
+                "dependencies",
+                "github-actions"
+            ],
+            "schedule": [
+                "before 10am on monday"
+            ],
+            "prPriority": 3,
+            "automerge": true,
+            "automergeType": "branch",
+            "groupName": "GitHub Actions"
+        },
+        {
+            "description": "Security updates - high priority",
+            "matchPackagePatterns": [
+                "*"
+            ],
+            "matchUpdateTypes": [
+                "patch"
+            ],
+            "matchCurrentVersion": "!/^0/",
+            "labels": [
+                "dependencies",
+                "security"
+            ],
+            "prPriority": 10,
+            "schedule": [
+                "at any time"
+            ],
+            "automerge": true,
+            "automergeType": "branch"
+        },
+        {
+            "description": "Major version updates",
+            "matchUpdateTypes": [
+                "major"
+            ],
+            "labels": [
+                "dependencies",
+                "major"
+            ],
+            "prPriority": 1,
+            "automerge": false,
+            "schedule": [
+                "before 10am on monday"
+            ]
+        },
+        {
+            "description": "Minor and patch updates",
+            "matchUpdateTypes": [
+                "minor",
+                "patch"
+            ],
+            "labels": [
+                "dependencies",
+                "minor-patch"
+            ],
+            "prPriority": 7,
+            "automerge": false,
+            "schedule": [
+                "before 10am on monday"
+            ]
+        },
+        {
+            "description": "Development dependencies",
+            "matchDepTypes": [
+                "dev-dependencies"
+            ],
+            "labels": [
+                "dependencies",
+                "dev"
+            ],
+            "prPriority": 2,
+            "automerge": true,
+            "automergeType": "branch",
+            "schedule": [
+                "before 10am on monday"
+            ]
+        }
+    ],
+    "vulnerabilityAlerts": {
+        "enabled": true,
+        "labels": [
+            "security",
+            "vulnerability"
+        ],
+        "prPriority": 20,
+        "schedule": [
+            "at any time"
+        ],
+        "automerge": true,
+        "automergeType": "branch"
+    },
+    "lockFileMaintenance": {
+        "enabled": true,
+        "schedule": [
+            "before 5am on monday"
+        ],
+        "commitMessageAction": "update",
+        "commitMessageTopic": "lock file",
+        "labels": [
+            "dependencies",
+            "lockfile"
+        ],
+        "prPriority": 1,
+        "automerge": true,
+        "automergeType": "branch"
+    },
+    "cargo": {
+        "enabled": true,
+        "rangeStrategy": "bump"
+    },
+    "github-actions": {
+        "enabled": true,
+        "pinDigests": true
+    },
+    "platformAutomerge": true,
+    "dependencyDashboard": true,
+    "dependencyDashboardTitle": "🤖 Dependency Dashboard",
+    "dependencyDashboardHeader": "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.",
+    "dependencyDashboardFooter": "- [ ] <!-- rebase-check -->Check this box to trigger a request for Renovate to run again on this repository"
+}
