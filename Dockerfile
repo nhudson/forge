@@ -3,8 +3,8 @@ FROM rust:1.87-slim AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
-    pkg-config \
-    libssl-dev \
+    pkg-config=0.29.2-1 \
+    libssl-dev=3.0.11-1~deb12u2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create app directory
@@ -24,8 +24,8 @@ FROM debian:12.11-slim
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    libssl3 \
+    ca-certificates=20230311 \
+    libssl3=3.0.11-1~deb12u2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user
