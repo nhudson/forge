@@ -1,4 +1,5 @@
 use clap::Parser;
+use crate::secure::SecurePassword;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -51,9 +52,9 @@ pub struct Args {
 }
 
 impl Args {
-    /// Get the password, defaulting to empty string if none provided
-    pub fn password(&self) -> &str {
-        self.password.as_deref().unwrap_or("")
+    /// Get the password, wrapped in a secure container that zeroizes memory when dropped
+    pub fn password(&self) -> SecurePassword {
+        SecurePassword::from_option(&self.password)
     }
 
     /// Get the output directory, defaulting to current directory

@@ -29,7 +29,9 @@ pub mod converter;
 pub mod error;
 pub mod openssl;
 pub mod output;
+pub mod secure;
 
 // Re-export commonly used types
 pub use error::ConversionError;
 pub use openssl::{ParsedPfx, PemFormatter, PfxParser};
+pub use secure::SecurePassword;
