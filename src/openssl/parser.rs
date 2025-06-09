@@ -1,5 +1,6 @@
 use crate::error::ConversionError;
 use crate::openssl::ParsedPfx;
+use crate::secure::SecurePassword;
 use openssl::pkcs12::Pkcs12;
 use std::fs;
 use std::path::Path;

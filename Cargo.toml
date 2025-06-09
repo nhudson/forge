@@ -26,6 +26,7 @@ console = "0.15.11"
 indicatif = "0.17.11"
 tabled = "0.20.0"
 colored = "3.0.0"
+zeroize = "1.7.0"
 
 [dev-dependencies]
 tempfile = "3.20.0"
