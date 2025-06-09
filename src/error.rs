@@ -8,6 +8,8 @@ pub enum ConversionError {
     FileRead(String, std::io::Error),
     /// Invalid PFX/P12 file format
     InvalidFormat(String),
+    /// Invalid file extension (not .pfx or .p12)
+    InvalidFileExtension(String),
     /// Wrong password or password required
     Authentication(String),
     /// Failed to create output directory
@@ -29,6 +31,9 @@ impl fmt::Display for ConversionError {
             }
             ConversionError::InvalidFormat(msg) => {
                 write!(f, "Invalid PFX file format: {}", msg)
+            }
+            ConversionError::InvalidFileExtension(ext) => {
+                write!(f, "Invalid file extension: '{}'. Expected .pfx or .p12", ext)
             }
             ConversionError::Authentication(msg) => {
                 write!(f, "Authentication failed: {}", msg)

@@ -3,6 +3,7 @@ use crate::openssl::ParsedPfx;
 use openssl::pkcs12::Pkcs12;
 use std::fs;
 use std::path::Path;
+use std::ffi::OsStr;
 
 /// Parser for PFX/P12 files
 pub struct PfxParser;
@@ -20,15 +21,40 @@ impl PfxParser {
             return Err(ConversionError::FileNotFound(path.display().to_string()));
         }
 
+        // Verify that the file is readable
+        if let Err(e) = fs::metadata(path) {
+            return Err(ConversionError::FileRead(
+                path.display().to_string(),
+                std::io::Error::new(std::io::ErrorKind::PermissionDenied, e),
+            ));
+        }
+
+        // Validate file extension (if it has one)
+        if let Some(ext) = path.extension().and_then(OsStr::to_str) {
+            let ext = ext.to_lowercase();
+            if ext != "pfx" && ext != "p12" {
+                return Err(ConversionError::InvalidFileExtension(ext));
+            }
+        }
+
         // Read the file
         let pfx_data =
             fs::read(path).map_err(|e| ConversionError::FileRead(path.display().to_string(), e))?;
+
+        // Validate file size
+        if pfx_data.is_empty() {
+            return Err(ConversionError::InvalidFormat("File is empty".to_string()));
+        }
 
         Self::parse_bytes(&pfx_data, password)
     }
 
     /// Parse PFX data from bytes
     pub fn parse_bytes(data: &[u8], password: &str) -> Result<ParsedPfx, ConversionError> {
+        // Validate input data
+        if data.is_empty() {
+            return Err(ConversionError::InvalidFormat("Empty PFX data provided".to_string()));
+        }
         // Parse the PKCS12 structure
         let pkcs12 = Pkcs12::from_der(data).map_err(|e| {
             ConversionError::InvalidFormat(format!("Failed to parse PFX structure: {}", e))
