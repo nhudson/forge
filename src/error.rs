@@ -8,6 +8,8 @@ pub enum ConversionError {
     FileRead(String, std::io::Error),
     /// Invalid PFX/P12 file format
     InvalidFormat(String),
+    /// Invalid file extension (not .pfx or .p12)
+    InvalidFileExtension(String),
     /// Wrong password or password required
     Authentication(String),
     /// Failed to create output directory
@@ -22,25 +24,28 @@ impl fmt::Display for ConversionError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ConversionError::FileNotFound(path) => {
-                write!(f, "PFX file not found: {}", path)
+                write!(f, "PFX file not found: {path}")
             }
             ConversionError::FileRead(path, err) => {
-                write!(f, "Failed to read PFX file '{}': {}", path, err)
+                write!(f, "Failed to read PFX file '{path}': {err}")
             }
             ConversionError::InvalidFormat(msg) => {
-                write!(f, "Invalid PFX file format: {}", msg)
+                write!(f, "Invalid PFX file format: {msg}")
+            }
+            ConversionError::InvalidFileExtension(ext) => {
+                write!(f, "Invalid file extension: '{ext}'. Expected .pfx or .p12",)
             }
             ConversionError::Authentication(msg) => {
-                write!(f, "Authentication failed: {}", msg)
+                write!(f, "Authentication failed: {msg}")
             }
             ConversionError::DirectoryCreation(path, err) => {
-                write!(f, "Failed to create output directory '{}': {}", path, err)
+                write!(f, "Failed to create output directory '{path}': {err}")
             }
             ConversionError::FileWrite(path, err) => {
-                write!(f, "Failed to write file '{}': {}", path, err)
+                write!(f, "Failed to write file '{path}': {err}")
             }
             ConversionError::Ssl(err) => {
-                write!(f, "SSL/TLS error: {}", err)
+                write!(f, "SSL/TLS error: {err}")
             }
         }
     }

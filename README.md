@@ -174,6 +174,94 @@ This will:
 | `--combined-file` | Custom combined file filename | `certificate_with_key.pem` |
 | `--verbose` | Enable verbose output | `false` |
 
+## 🪟 Windows Troubleshooting
+
+If you encounter authentication or parsing errors on Windows, here are common issues and solutions:
+
+### Common Windows Errors
+
+#### 1. Legacy Algorithm Error (RC2-40-CBC)
+```
+Error: Authentication failed: Failed to parse PFX file with provided password: 
+error: 0308010C:digital envelope routines: inner_evp_generic_fetch:unsupported:
+crypto\evp\evp_fetch.c:375:Global default library context, Algorithm (RC2-40-CBC : 0), Properties ()
+```
+
+**Cause**: Your PFX file uses the legacy RC2-40-CBC encryption algorithm, which newer OpenSSL versions don't support by default.
+
+**Solutions**:
+1. **Re-export the certificate** with modern encryption:
+   ```powershell
+   # Use Windows Certificate Manager (certmgr.msc) to export with "TripleDES-SHA1" encryption
+   # Or use PowerShell:
+   Get-PfxCertificate -FilePath "old.pfx" | Export-PfxCertificate -FilePath "new.pfx" -Password (ConvertTo-SecureString "password" -AsPlainText -Force)
+   ```
+
+2. **Use OpenSSL command line** as a workaround:
+   ```bash
+   # Convert using OpenSSL directly
+   openssl pkcs12 -in certificate.pfx -out certificate.pem -nodes
+   # Then split the file manually if needed
+   ```
+
+3. **Contact your certificate provider** for a version with modern encryption.
+
+#### 2. MAC Verification Failure
+```
+Error: Authentication failed: Failed to parse PFX file with provided password: 
+error: 11800071:PKCS12 routines: PKCS12_parse:mac verify failure:crypto\pkcs12\p12_kiss.c:71:
+```
+
+**Cause**: Usually indicates password issues or file corruption.
+
+**Solutions**:
+1. **Verify the password** is correct (case-sensitive)
+2. **Try password variations**:
+   ```bash
+   # If password has special characters, try with quotes
+   forge --pfx certificate.pfx --password "my@pass!word"
+   
+   # Try without quotes
+   forge --pfx certificate.pfx --password my@pass!word
+   
+   # Check for hidden spaces (copy-paste issue)
+   ```
+
+3. **Password with special characters**:
+   - Avoid: `\ " < > | & ; ( ) ^ %`
+   - If you must use them, surround with quotes: `--password "my\"special\"pass"`
+
+4. **Check file integrity**:
+   ```powershell
+   # Test the file with Windows certutil
+   certutil -dump certificate.pfx
+   ```
+
+### Best Practices for Windows
+
+1. **Use simple passwords** without special characters for PFX files
+2. **Export certificates with modern encryption** (AES-256-CBC instead of RC2-40-CBC)
+3. **Use PowerShell for certificate operations**:
+   ```powershell
+   # Create a new PFX with modern encryption
+   $cert = Get-PfxCertificate -FilePath "input.pfx"
+   $securePassword = ConvertTo-SecureString "newpassword" -AsPlainText -Force
+   Export-PfxCertificate -Cert $cert -FilePath "output.pfx" -Password $securePassword
+   ```
+
+4. **Verify PFX integrity** before conversion:
+   ```bash
+   # Test with forge first (it will provide detailed error messages)
+   forge --pfx certificate.pfx --verbose
+   ```
+
+### Getting Help
+
+If you continue to experience issues:
+1. Run with `--verbose` flag for detailed error information
+2. Check if the same PFX file works with OpenSSL command line tools
+3. [Open an issue](https://github.com/nhudson/forge/issues) with the full error message and PFX file details (never share the actual PFX file or password)
+
 ## 📁 Output Files
 
 Forge generates the following files based on your options:

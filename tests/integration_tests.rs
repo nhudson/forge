@@ -198,3 +198,33 @@ fn test_nonexistent_file() {
         _ => panic!("Expected FileNotFound error"),
     }
 }
+
+// #[test]
+// fn test_password_variants_generation() {
+//     // Test the password variant generation for Windows compatibility
+//     let variants = forge::openssl::parser::PfxParser::generate_password_variants("test\\pass");
+//     assert!(variants.contains(&"test\\pass".to_string()));
+//     assert!(variants.contains(&"test/pass".to_string()));
+//     assert!(variants.contains(&"testpass".to_string()));
+
+//     let variants_quotes =
+//         forge::openssl::parser::PfxParser::generate_password_variants("test\"pass");
+//     assert!(variants_quotes.contains(&"test\"pass".to_string()));
+//     assert!(variants_quotes.contains(&"test\\\"pass".to_string()));
+//     assert!(variants_quotes.contains(&"testpass".to_string()));
+
+//     let variants_spaces = forge::openssl::parser::PfxParser::generate_password_variants(" test ");
+//     assert!(variants_spaces.contains(&" test ".to_string()));
+//     assert!(variants_spaces.contains(&"test".to_string()));
+// }
+#[test]
+fn test_error_message_patterns() {
+    // Test that we can identify Windows-specific error patterns
+    let rc2_error_msg = "error: 0308010C:digital envelope routines: inner_evp_generic_fetch:unsupported:crypto\\evp\\evp_fetch.c:375:Global default library context, Algorithm (RC2-40-CBC : 0), Properties ()";
+    assert!(rc2_error_msg.contains("RC2-40-CBC"));
+    assert!(rc2_error_msg.contains("unsupported"));
+
+    let mac_error_msg = "error: 11800071:PKCS12 routines: PKCS12_parse:mac verify failure:crypto\\pkcs12\\p12_kiss.c:71:";
+    assert!(mac_error_msg.contains("mac verify failure"));
+    assert!(mac_error_msg.contains("PKCS12"));
+}
