@@ -48,7 +48,7 @@ impl OutputHandler {
         if self.config.use_colors {
             writeln!(self.term, "{} {}", "⚡".bright_yellow(), message.bold())?;
         } else {
-            writeln!(self.term, "=> {}", message)?;
+            writeln!(self.term, "=> {message}")?;
         }
         Ok(())
     }
@@ -58,7 +58,7 @@ impl OutputHandler {
         if self.config.use_colors {
             writeln!(self.term, "{} {}", "✓".bright_green(), message)?;
         } else {
-            writeln!(self.term, "✓ {}", message)?;
+            writeln!(self.term, "✓ {message}")?;
         }
         Ok(())
     }
@@ -69,7 +69,7 @@ impl OutputHandler {
             if self.config.use_colors {
                 writeln!(self.term, "{} {}", "ℹ".bright_blue(), message.dimmed())?;
             } else {
-                writeln!(self.term, "i {}", message)?;
+                writeln!(self.term, "i {message}")?;
             }
         }
         Ok(())

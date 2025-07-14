@@ -125,7 +125,7 @@ impl OutputFormatter {
         if self.config.use_colors {
             writeln!(term, "{}", table.to_string().bright_white())?;
         } else {
-            writeln!(term, "{}", table)?;
+            writeln!(term, "{table}")?;
         }
 
         // Statistics box
@@ -186,7 +186,7 @@ impl OutputFormatter {
         if self.config.use_colors {
             writeln!(term, "{}", table.to_string().bright_white())?;
         } else {
-            writeln!(term, "{}", table)?;
+            writeln!(term, "{table}")?;
         }
 
         Ok(())

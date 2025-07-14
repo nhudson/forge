@@ -29,7 +29,7 @@ impl ProgressReporter {
     /// Update progress for file reading
     pub fn reading_file(&self, filename: &str) {
         if let Some(ref bar) = self.bar {
-            bar.set_message(format!("Reading PFX file: {}", filename));
+            bar.set_message(format!("Reading PFX file: {filename}"));
             bar.set_position(1);
         }
     }
@@ -61,7 +61,7 @@ impl ProgressReporter {
     /// Update progress for chain extraction
     pub fn extracting_chain(&self, count: usize) {
         if let Some(ref bar) = self.bar {
-            bar.set_message(format!("Extracting certificate chain ({} certs)...", count));
+            bar.set_message(format!("Extracting certificate chain ({count} certs)..."));
             bar.set_position(5);
         }
     }
@@ -86,7 +86,7 @@ impl ProgressReporter {
     /// Handle errors
     pub fn error(&self, message: &str) {
         if let Some(ref bar) = self.bar {
-            bar.abandon_with_message(format!("Error: {}", message));
+            bar.abandon_with_message(format!("Error: {message}"));
         }
     }
 

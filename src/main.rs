@@ -12,7 +12,7 @@ fn main() {
     let args = Args::parse();
 
     if let Err(e) = run(args) {
-        eprintln!("Error: {}", e);
+        eprintln!("Error: {e}");
         process::exit(1);
     }
 }
