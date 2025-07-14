@@ -16,6 +16,14 @@ pub fn convert_pfx_to_pem(args: Args) -> Result<(), Box<dyn std::error::Error>> 
     progress.start_conversion();
 
     output.info("Starting PFX to PEM conversion...")?;
+
+    // Validate input arguments before proceeding
+    output.info("Validating input arguments...")?;
+    if let Err(e) = args.validate() {
+        progress.error(&format!("Validation failed: {e}"));
+        return Err(Box::new(e));
+    }
+
     output.info(&format!("Input file: {}", args.pfx))?;
 
     // Create output directory
@@ -23,18 +31,18 @@ pub fn convert_pfx_to_pem(args: Args) -> Result<(), Box<dyn std::error::Error>> 
     progress.reading_file(&args.pfx);
 
     fs::create_dir_all(output_dir).map_err(|e| {
-        progress.error(&format!("Failed to create output directory: {}", e));
+        progress.error(&format!("Failed to create output directory: {e}"));
         ConversionError::DirectoryCreation(output_dir.to_string(), e)
     })?;
 
-    output.info(&format!("Output directory: {}", output_dir))?;
+    output.info(&format!("Output directory: {output_dir}"))?;
 
     // Parse the PFX file
     output.status("Converting PFX to PEM format...")?;
     progress.parsing();
 
     let parsed = PfxParser::parse_file(&args.pfx, args.password()).map_err(|e| {
-        progress.error(&format!("Failed to parse PFX: {}", e));
+        progress.error(&format!("Failed to parse PFX: {e}"));
         e
     })?;
 

@@ -20,10 +20,10 @@ name = "forge"
 path = "src/lib.rs"
 
 [dependencies]
-clap = { version = "4.5.39", features = ["derive"] }
+clap = { version = "4.5.41", features = ["derive"] }
 openssl = "0.10.73"
-console = "0.15.11"
-indicatif = "0.17.11"
+console = "0.16.0"
+indicatif = "0.18.0"
 tabled = "0.20.0"
 colored = "3.0.0"
 zeroize = "1.7.0"

@@ -1,5 +1,7 @@
+use crate::error::ConversionError;
 use clap::Parser;
 use crate::secure::SecurePassword;
+use std::path::Path;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -77,5 +79,54 @@ impl Args {
         self.combined_file
             .as_deref()
             .unwrap_or("certificate_with_key.pem")
+    }
+
+    /// Validate all input arguments before starting conversion
+    pub fn validate(&self) -> Result<(), ConversionError> {
+        // Validate PFX file path
+        let pfx_path = Path::new(&self.pfx);
+
+        // Check if the path exists
+        if !pfx_path.exists() {
+            return Err(ConversionError::FileNotFound(self.pfx.clone()));
+        }
+
+        // Check if it's a file
+        if !pfx_path.is_file() {
+            return Err(ConversionError::InvalidFormat(format!(
+                "'{}' is not a file",
+                self.pfx
+            )));
+        }
+
+        // Validate file extension (if available)
+        if let Some(ext) = pfx_path.extension().and_then(|e| e.to_str()) {
+            let ext = ext.to_lowercase();
+            if ext != "pfx" && ext != "p12" {
+                return Err(ConversionError::InvalidFileExtension(ext));
+            }
+        }
+
+        // Validate output directory
+        let out_dir = Path::new(self.output_dir());
+        if out_dir.exists() && !out_dir.is_dir() {
+            return Err(ConversionError::InvalidFormat(format!(
+                "Output path '{}' exists but is not a directory",
+                self.output_dir()
+            )));
+        }
+
+        // Password validation (if explicitly provided)
+        if let Some(ref pwd) = self.password {
+            if pwd.is_empty() {
+                // If password is explicitly provided but empty, warn user
+                // Since empty password is valid in some cases, we don't return an error
+                eprintln!(
+                    "Warning: Empty password provided. If the PFX file requires a password, conversion might fail."
+                );
+            }
+        }
+
+        Ok(())
     }
 }

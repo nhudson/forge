@@ -1,5 +1,5 @@
 mod formatter;
-mod parser;
+pub mod parser;
 
 pub use formatter::PemFormatter;
 pub use parser::PfxParser;
