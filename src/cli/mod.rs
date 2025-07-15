@@ -56,7 +56,7 @@ pub struct Args {
 impl Args {
     /// Get the password, wrapped in a secure container that zeroizes memory when dropped
     pub fn password(&self) -> SecurePassword {
-        SecurePassword::from_option(&self.password)
+        SecurePassword::from_option(self.password.as_deref())
     }
 
     /// Get the output directory, defaulting to current directory
