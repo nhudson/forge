@@ -3,7 +3,7 @@ use std::ops::Deref;
 use zeroize::Zeroize;
 
 /// A secure password container that automatically zeroizes memory when dropped
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct SecurePassword {
     value: String,
 }
